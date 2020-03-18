@@ -1,11 +1,14 @@
-package main
+package trie
 
 import (
 	// "fmt"
 	"github.com/k0kubun/pp"
+	"github.com/arccoza/go-trie/generic"
 )
 
-type UPTrie struct{
+type Item = generic.Type
+
+type ItemTrie struct{
 	root node
 }
 
@@ -14,51 +17,31 @@ type node struct {
 	hmask byte
 	tmask byte
 	leaf bool
-	props uint64
+	value Item
+	MergeOp func(Item, Item) Item
 	edges edges
 }
 
 type edges []*node
 
-func NewUPTrie() *UPTrie {
-	return &UPTrie{root: node{edges: make(edges, 16)}}
+func NewItemTrie() *ItemTrie {
+	return &ItemTrie{root: node{edges: make(edges, 16)}}
 }
 
-func (t *UPTrie) Get(key []byte) *node {
+func (t *ItemTrie) Get(key []byte) *node {
 	return t.root.get(key, 0xF0)
 }
 
-func (t *UPTrie) Put(key []byte, props uint64) {
-	t.root.put(&node{prefix: key, hmask: 0xF0, tmask: 0x0F, leaf: true, props: props})
+func (t *ItemTrie) Put(key []byte, value Item) {
+	t.root.put(&node{prefix: key, hmask: 0xF0, tmask: 0x0F, leaf: true, value: value})
 }
 
-func (t *UPTrie) Del(key []byte) {
+func (t *ItemTrie) Del(key []byte) {
 	// return t.root.del(key, 0xF0)
 }
 
 func (n *node) IsLeaf() bool {
 	return n.leaf
-}
-
-func (n *node) All() []*node {
-	q, ns, all := NewQueue(16), []*node{nil}, make([]*node, 0, 16)
-	q = q.Enqueue(n)
-
-	pp.Println("ALL")
-	for q, i := q.Dequeue(ns); i > 0; q, i = q.Dequeue(ns) {
-		pp.Println(i)
-		for _, n := range ns[0].edges {
-			// pp.Println(n)
-			if n != nil {
-				q = q.Enqueue(n)
-			}
-			if n != nil && n.leaf {
-				all = append(all, n)
-			}
-		}
-	}
-
-	return all
 }
 
 func (e edges) add(n *node) {
@@ -73,12 +56,12 @@ func (head *node) split(brk int, msk byte, off int) (tail *node) {
 			hmask: ^msk,
 			tmask: head.tmask,
 			leaf: head.leaf,
-			props: head.props,
+			value: head.value,
 			edges: head.edges,
 		}
 		head.prefix = head.prefix[:brk + off + 1]
 		head.edges = make(edges, 16)
-		head.tmask, head.leaf, head.props = msk, false, 0
+		head.tmask, head.leaf, head.value = msk, false, 0
 	}
 
 	return tail
@@ -105,7 +88,7 @@ func (prv *node) put(n *node) {
 		if !n.chop(brk, msk, off) {
 			// pp.Println("MATCH", n)
 			frm.leaf = true
-			frm.props |= n.props
+			frm.value = n.value // TODO: Integrate MergeOp fn
 			return
 		// NO MATCH
 		} else {
