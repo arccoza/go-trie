@@ -53,7 +53,8 @@ func (e edges) add(n *node) {
 }
 
 func (head *node) split(brk int, msk byte, off int) (tail *node) {
-	if brk < len(head.prefix) {
+	pp.Println("SPLIT --> ", head.hmask, head.tmask, msk)
+	if brk < len(head.prefix) && !(brk == (len(head.prefix) - 1) && msk <= head.tmask) {
 		tail = &node{
 			prefix: head.prefix[brk + off:],
 			hmask: ^msk,
@@ -71,7 +72,7 @@ func (head *node) split(brk int, msk byte, off int) (tail *node) {
 }
 
 func (n *node) chop(brk int, msk byte, off int) bool {
-	if brk < len(n.prefix) {
+	if brk < len(n.prefix) && !(brk == (len(n.prefix) - 1) && msk <= n.tmask) {
 		n.prefix = n.prefix[brk + off:]
 		n.hmask = ^msk
 		return true
@@ -84,19 +85,20 @@ func (prv *node) put(n *node) {
 	for frm, brk, msk, off := walk(prv, n.prefix, n.hmask); brk >= 0 ; frm, brk, msk, off = walk(frm, n.prefix, n.hmask) {
 		// SPLIT EXISTING
 		if tail := frm.split(brk, msk, off); tail != nil {
-			// pp.Println("SPLIT", tail)
+			pp.Println("SPLIT", tail)
 			frm.edges.add(tail)
 		}
 		// MATCH
 		if !n.chop(brk, msk, off) {
-			// pp.Println("MATCH", n)
+			pp.Println("MATCH", n)
 			frm.leaf = true
 			frm.value = n.value // TODO: Integrate MergeOp fn
 			return
 		// NO MATCH
 		} else {
-			// pp.Println("NO MATCH")
+			pp.Println("NO MATCH")
 			prv = frm
+			// break
 		}
 	}
 
@@ -104,6 +106,7 @@ func (prv *node) put(n *node) {
 		prv.edges = make(edges, 16)
 	}
 	prv.edges.add(n)
+	pp.Println("NEW", prv)
 }
 
 func (rt *node) get(key []byte, nib byte) *node {
@@ -127,19 +130,23 @@ func (rt *node) get(key []byte, nib byte) *node {
 func walk(from *node, key []byte, nib byte) (*node, int, byte, int) {
 	if len(key) == 0 { return nil, -1, nib, 0 }
 	idx := getNibble(key[0], nib)
+	if from.edges == nil { return nil, -1, nib, 0 }
 	n := from.edges[idx]
 	if n == nil { return nil, -1, nib, 0 }
 	// if len(n.prefix) == 0 { return nil, -1, nib, 0 }
 
 	brk, msk, off := 0, byte(0x0F), -1
 	for minLen := minInt(len(n.prefix), len(key)); brk < minLen; brk++ {
+		pp.Println("WALK --> ", n.prefix[brk], key[brk])
 		if a, b := n.prefix[brk], key[brk]; a != b {
 			if (a ^ b) & 0xF0 == 0 {
 				msk = 0xF0
 				off = 0
+				pp.Println("WALK A --> ", msk)
 			} else {
 				off = 1
 				brk--
+				pp.Println("WALK B --> ", msk)
 			}
 			break
 		}
