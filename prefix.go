@@ -1,6 +1,7 @@
 package trie
 
 import (
+	"fmt"
 	"math"
 	"github.com/k0kubun/pp"
 )
@@ -46,11 +47,23 @@ func (p *Prefix) Get(idx int) byte {
 
 // Use Receiver type of Prefix instead of *Prefix
 // so that we get a simple copy of p.
-func (p Prefix) Slice(a, b int) Prefix {
-	p.ptr, p.lth = a, b
+func (p Prefix) Slice(args ...int) Prefix {
+	ptr, lth, nargs := p.ptr, p.lth, len(args)
+	if nargs > 0 {
+		ptr = p.ptr + args[0]
+		lth = p.lth - args[0]
+	}
+	if nargs > 1 {
+		lth = args[1] - args[0]
+	}
+
+	pp.Println(ptr, lth, p.ptr, p.lth)
+
+	if (ptr - p.ptr) < p.lth && (ptr + lth - p.ptr) <= p.lth {
+		p.ptr, p.lth = ptr, lth
+	} else {
+		panic(fmt.Errorf("bounds out of range %v, %v", ptr - p.ptr, ptr + lth - p.ptr))
+	}
+
 	return p
 }
-
-// func (pa *Prefix) Append(pb *Prefix) Prefix {
-
-// }
