@@ -45,24 +45,25 @@ func (p *Prefix) Get(idx int) byte {
 	return p.key[ia] >> (int(p.exp) * (int(p.div) - 1 - ib)) & msk
 }
 
-// Use Receiver type of Prefix instead of *Prefix
-// so that we get a simple copy of p.
+// Use receiver type of Prefix instead of *Prefix
+// so that we get a simple, shallow copy of p.
 func (p Prefix) Slice(args ...int) Prefix {
-	ptr, lth, nargs := p.ptr, p.lth, len(args)
+	a, b, nargs := 0, p.lth, len(args)
 	if nargs > 0 {
-		ptr = p.ptr + args[0]
-		lth = p.lth - args[0]
+		a = args[0]
 	}
 	if nargs > 1 {
-		lth = args[1] - args[0]
+		b = args[1]
 	}
 
-	pp.Println(ptr, lth, p.ptr, p.lth)
-
-	if (ptr - p.ptr) < p.lth && (ptr + lth - p.ptr) <= p.lth {
-		p.ptr, p.lth = ptr, lth
+	if a < 0 || b < 0 {
+		panic(fmt.Errorf("Prefix.Slice invalid index %v, %v (index must be non-negative)", a, b))
+	} else if a > b {
+		panic(fmt.Errorf("Prefix.Slice invalid index %v > %v", a, b))
+	} else if a > p.lth || b > p.lth {
+		panic(fmt.Errorf("Prefix.Slice bounds out of range %v, %v", a, b))
 	} else {
-		panic(fmt.Errorf("bounds out of range %v, %v", ptr - p.ptr, ptr + lth - p.ptr))
+		p.ptr, p.lth = p.ptr + a, b - a
 	}
 
 	return p
