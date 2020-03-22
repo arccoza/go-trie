@@ -29,7 +29,7 @@ type Prefix struct {
 }
 
 func (p *Prefix) Len() int {
-	return len(p.key) * 8 / int(p.exp)
+	return p.lth
 }
 
 func (p *Prefix) Get(idx int) byte {
