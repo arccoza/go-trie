@@ -1,8 +1,8 @@
 package trie
 
 import (
-	"github.com/k0kubun/pp"
 	"math"
+	"github.com/k0kubun/pp"
 )
 
 type radix uint16
