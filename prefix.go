@@ -5,19 +5,27 @@ import (
 	"math"
 )
 
-type radix byte
+type radix uint16
 
 const (
-	R2 radix = 1 << iota
-	R4
-	R16
-	R256
+	R2   radix = 2
+	R4   radix = 4
+	R16  radix = 16
+	R256 radix = 256
 )
 
+func NewPrefix(rdx radix, key []byte) Prefix {
+	exp := int(math.Log2(float64(rdx)))
+	div := 8 / exp
+	lth := len(key) * 8 / exp
+	return Prefix{rdx: rdx, exp: byte(exp), div: byte(div), ptr: 0, lth: lth, key: key}
+}
+
 type Prefix struct {
-	rdx, exp, div byte
+	rdx      radix
+	exp, div byte
 	ptr, lth int
-	key []byte
+	key      []byte
 }
 
 func (p *Prefix) Len() int {
@@ -25,13 +33,14 @@ func (p *Prefix) Len() int {
 }
 
 func (p *Prefix) Get(idx int) byte {
-	div := 8 / int(p.exp)
-	ia, ib := idx/int(div), idx%int(div)
-	msk := byte(math.Pow(2, float64(p.exp)) - 1)
-	pp.Println(div, ia, ib, msk)
-	return p.key[ia] >> (int(p.exp) * (div - 1 - ib)) & msk
+	ia, ib := idx/int(p.div), idx%int(p.div)
+	msk := byte(p.rdx - 1)
+	pp.Println(p.div, ia, ib, msk)
+	return p.key[ia] >> (int(p.exp) * (int(p.div) - 1 - ib)) & msk
 }
 
+// Use Receiver type of Prefix instead of *Prefix
+// so that we get a simple copy of p.
 func (p Prefix) Slice(a, b int) Prefix {
 	p.ptr, p.lth = a, b
 	return p
