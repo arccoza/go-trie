@@ -33,6 +33,11 @@ func (p *Prefix) Len() int {
 }
 
 func (p *Prefix) Get(idx int) byte {
+	if idx >= p.lth {
+		panic(fmt.Errorf("index out of range %v", idx)
+	}
+
+	idx += p.ptr
 	ia, ib := idx/int(p.div), idx%int(p.div)
 	msk := byte(p.rdx - 1)
 	pp.Println(p.div, ia, ib, msk)
