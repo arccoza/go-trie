@@ -16,3 +16,10 @@ func Uint32ToBytes(buf []byte, num uint32) []byte {
 	}
 	return buf
 }
+
+func MinInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
