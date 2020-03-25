@@ -68,3 +68,17 @@ func (p Prefix) Slice(args ...int) Prefix {
 
 	return p
 }
+
+func bitMask(exp, n int) byte {
+	return byte(math.Pow(2, float64(exp*n)) - 1) << (exp * (8/exp - n))
+}
+
+func bitCompare(a, b, exp byte, n int) (i int) {
+	for ; i < n; i++ {
+		msk := bitMask(int(exp), i + 1)
+		if (a ^ b) & msk != 0 {
+			break
+		}
+	}
+	return
+}
