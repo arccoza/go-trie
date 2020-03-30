@@ -36,23 +36,23 @@ func (p *Prefix) div() int {
 }
 
 func (p *Prefix) relIdx(i int) [2]int {
-	return [2]int{i/int(p.div()), i%int(p.div())}
+	return [2]int{i/p.div(), i%p.div()}
 }
 
 func (p *Prefix) absIdx(i1, i2 int) int {
-	return i1*int(p.div()) + i2%int(p.div())
+	return i1*p.div() + i2%p.div()
 }
 
 func (p *Prefix) supIdx(i int) int {
-	return i/int(p.div())
+	return i/p.div()
 }
 
 func (p *Prefix) subIdx(i int) int {
-	return i%int(p.div())
+	return i%p.div()
 }
 
 func (p *Prefix) supLen(l int) int {
-	return l/int(p.div())
+	return l/p.div()
 }
 
 func (p *Prefix) Len() int {
