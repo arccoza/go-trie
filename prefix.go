@@ -29,8 +29,12 @@ type Prefix struct {
 	key      []byte
 }
 
-func (p *Prefix) relIdx(i int) (int, int) {
-	return i/int(p.div), i%int(p.div)
+func (p *Prefix) relIdx(i int) [2]int {
+	return [2]int{i/int(p.div), i%int(p.div)}
+}
+
+func (p *Prefix) absIdx(i1, i2 int) int {
+	return i1*int(p.div) + i2%int(p.div)
 }
 
 func (p *Prefix) supIdx(i int) int {
