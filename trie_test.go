@@ -97,3 +97,15 @@ func TestSlice_R16(t *testing.T) {
 	assert.Panics(t, func() { p4.Get(0) }, "Prefix.Slice(1).Slice(1, 2).Slice(1, 1).Get(0) should panic")
 	assert.Panics(t, func() { p4.Get(-1) }, "Prefix.Slice(1).Slice(1, 2).Slice(1, 1).Get(-1) should panic")
 }
+
+func TestLen_R16(t *testing.T) {
+	p := NewPrefix(R16, []byte{0xAB, 0xCD})
+	want := 4
+	got := p.Len()
+	p2 := p.Slice(4, 4)
+	p2want := 0
+	p2got := p2.Len()
+
+	assert.Equalf(t, want, got, "Prefix.Len() should equal %#X", want)
+	assert.Equalf(t, p2want, p2got, "Prefix.Slice(4, 4).Len() should equal %#X", want)
+}
