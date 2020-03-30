@@ -55,10 +55,10 @@ func (p *Prefix) Get(idx int) byte {
 	}
 
 	idx += p.ptr
-	ia, ib := idx/int(p.div), idx%int(p.div)
+	i1, i2 := p.relIdx(idx)
 	msk := byte(p.rdx - 1)
-	pp.Println(p.div, ia, ib, msk)
-	return p.key[ia] >> (int(p.exp) * (int(p.div) - 1 - ib)) & msk
+	// pp.Println(p.div, i1, i2, msk)
+	return p.key[i1] >> (int(p.exp) * (int(p.div) - 1 - i2)) & msk
 }
 
 // Use receiver type of Prefix instead of *Prefix
