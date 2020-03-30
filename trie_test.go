@@ -69,3 +69,31 @@ func TestGet_R16(t *testing.T) {
 	assert.Panics(t, func() { p.Get(4) }, "Prefix.Get(4) should panic")
 	assert.Panics(t, func() { p.Get(-1) }, "Prefix.Get(-1) should panic")
 }
+
+func TestSlice_R16(t *testing.T) {
+	p := NewPrefix(R16, []byte{0xAB, 0xCD})
+	p2 := p.Slice(1)
+	p2want := []byte{0x0B, 0x0C, 0x0D}
+	p2got := []byte{p2.Get(0), p2.Get(1), p2.Get(2)}
+	p3 := p2.Slice(1, 2)
+	p3want := []byte{0x0C}
+	p3got := []byte{p3.Get(0)}
+	p4 := p3.Slice(1, 1)
+
+	assert.NotSame(t, &p, &p2, "Prefix.Slice should return a new Prefix")
+	assert.Equal(t, p2, p.Slice(1, 4), "Prefix.Slice(1) should equal Prefix.Slice(1, 4)")
+
+	assert.Equalf(t, p2want[0], p2got[0], "Prefix.Slice(1).Get(0) should equal %#X", p2want[0])
+	assert.Equalf(t, p2want[1], p2got[1], "Prefix.Slice(1).Get(1) should equal %#X", p2want[1])
+	assert.Equalf(t, p2want[2], p2got[2], "Prefix.Slice(1).Get(2) should equal %#X", p2want[2])
+	assert.Panics(t, func() { p2.Get(3) }, "Prefix.Slice(1).Get(3) should panic")
+	assert.Panics(t, func() { p2.Get(-1) }, "Prefix.Slice(1).Get(-1) should panic")
+
+	assert.Equalf(t, p3want[0], p3got[0], "Prefix.Slice(1).Slice(1, 2).Get(0) should equal %#X", p3want[0])
+	assert.Panics(t, func() { p3.Get(2) }, "Prefix.Slice(1).Slice(1, 2).Get(2) should panic")
+	assert.Panics(t, func() { p3.Get(-1) }, "Prefix.Slice(1).Slice(1, 2).Get(-1) should panic")
+
+	assert.Equalf(t, 0, p4.Len(), "Prefix.Slice(1).Slice(1, 2).Slice(1, 1).Len() should equal %#X", 0)
+	assert.Panics(t, func() { p4.Get(0) }, "Prefix.Slice(1).Slice(1, 2).Slice(1, 1).Get(0) should panic")
+	assert.Panics(t, func() { p4.Get(-1) }, "Prefix.Slice(1).Slice(1, 2).Slice(1, 1).Get(-1) should panic")
+}
