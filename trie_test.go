@@ -37,6 +37,7 @@ func TestMain(m *testing.M) {
 
 
 	// p := NewPrefix(R16, []byte{0xAB, 0xCD})
+	// pp.Println(p.Slice(5, 5))
 	// // p := Prefix{exp: 4, key: []byte{0xAB, 0xCD}}
 	// pp.Println(p, R2, R4, R16, R256)
 	// pp.Println(p.Get(0), p.Get(1), p.Len())
@@ -96,6 +97,10 @@ func TestSlice_R16(t *testing.T) {
 	assert.Equalf(t, 0, p4.Len(), "Prefix.Slice(1).Slice(1, 2).Slice(1, 1).Len() should equal %#X", 0)
 	assert.Panics(t, func() { p4.Get(0) }, "Prefix.Slice(1).Slice(1, 2).Slice(1, 1).Get(0) should panic")
 	assert.Panics(t, func() { p4.Get(-1) }, "Prefix.Slice(1).Slice(1, 2).Slice(1, 1).Get(-1) should panic")
+
+	assert.Panics(t, func() { p.Slice(5) }, "Prefix.Slice(5) should panic")
+	assert.Panics(t, func() { p.Slice(0, 5) }, "Prefix.Slice(0, 5) should panic")
+	assert.Panics(t, func() { p.Slice(5, 5) }, "Prefix.Slice(5, 5) should panic")
 }
 
 func TestLen_R16(t *testing.T) {
