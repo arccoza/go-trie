@@ -17,36 +17,42 @@ const (
 
 func NewPrefix(rdx radix, key []byte) Prefix {
 	exp := int(math.Log2(float64(rdx)))
-	div := 8 / exp
 	lth := len(key) * 8 / exp
-	return Prefix{rdx: rdx, exp: byte(exp), div: byte(div), ptr: 0, lth: lth, key: key}
+	return Prefix{exp: byte(exp), ptr: 0, lth: lth, key: key}
 }
 
 type Prefix struct {
-	rdx      radix
-	exp, div byte
+	exp byte
 	ptr, lth int
 	key      []byte
 }
 
+func (p *Prefix) rdx() int {
+ return int(math.Pow(2, float64(p.exp)))
+}
+
+func (p *Prefix) div() int {
+ return 8 / int(p.exp)
+}
+
 func (p *Prefix) relIdx(i int) [2]int {
-	return [2]int{i/int(p.div), i%int(p.div)}
+	return [2]int{i/int(p.div()), i%int(p.div())}
 }
 
 func (p *Prefix) absIdx(i1, i2 int) int {
-	return i1*int(p.div) + i2%int(p.div)
+	return i1*int(p.div()) + i2%int(p.div())
 }
 
 func (p *Prefix) supIdx(i int) int {
-	return i/int(p.div)
+	return i/int(p.div())
 }
 
 func (p *Prefix) subIdx(i int) int {
-	return i%int(p.div)
+	return i%int(p.div())
 }
 
 func (p *Prefix) supLen(l int) int {
-	return l/int(p.div)
+	return l/int(p.div())
 }
 
 func (p *Prefix) Len() int {
