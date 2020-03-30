@@ -3,7 +3,7 @@ package trie
 import (
 	"fmt"
 	"math"
-	"github.com/k0kubun/pp"
+	// "github.com/k0kubun/pp"
 )
 
 type radix uint16
