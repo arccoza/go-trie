@@ -60,7 +60,7 @@ func (p *Prefix) Len() int {
 }
 
 func (p *Prefix) Get(idx int) byte {
-	if idx >= p.lth {
+	if idx < 0 || idx >= p.lth {
 		panic(fmt.Errorf("Prefix.Get index out of range %v", idx))
 	}
 
